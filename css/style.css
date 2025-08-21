@@ -1202,14 +1202,25 @@ button {
     padding: var(--spacing-xl);
 }
 
-.chapter-title {
+.chapter-title-container {
+    margin-bottom: var(--spacing-2xl);
+}
+
+.chapter-number {
     font-size: var(--font-2xl);
     color: var(--text-primary);
-    margin-bottom: var(--spacing-xl);
-    letter-spacing: 1px;
+    letter-spacing: 3px;
     font-weight: normal;
-    border-bottom: 2px solid var(--border-outer);
+    margin-bottom: var(--spacing-sm);
+}
+
+.chapter-name {
+    font-size: var(--font-lg);
+    color: var(--text-secondary);
+    letter-spacing: 2px;
+    margin-top: var(--spacing-sm);
     padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--border-outer);
 }
 
 .chapter-text {
@@ -1220,13 +1231,71 @@ button {
     text-align: left;
 }
 
-.continue-btn {
-    padding: var(--spacing-md) var(--spacing-2xl);
-    background: var(--border-outer);
-    border: 2px solid var(--border-outer);
-    color: var(--text-white);
+.continue-btn-container {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--spacing-2xl);
+}
+
+.continue-btn-text {
+    color: var(--text-primary);
     font-size: var(--font-md);
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.continue-btn-text:hover {
+    color: var(--border-outer);
+    transform: translateX(5px);
+}
+
+/* ========================================
+   小标题边框样式
+   ======================================== */
+
+.section-title-bordered {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border: 1px solid var(--border-outer);
+    border-radius: 3px;
+    color: var(--text-primary);
+    font-size: var(--font-sm);
     font-weight: normal;
+    letter-spacing: 1px;
+    margin-bottom: var(--spacing-sm);
+}
+
+/* 人物详情弹窗头像放大 */
+.character-avatar-large {
+    width: 80px !important;
+    height: 80px !important;
+    font-size: 32px !important;
+    line-height: 80px !important;
+}
+
+/* 道具详情名称样式 */
+.item-detail-name {
+    font-size: var(--font-lg);
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-lg);
+    letter-spacing: 1px;
+}
+
+.item-detail-block {
+    margin-bottom: var(--spacing-md);
+}
+
+.item-detail-label {
+    margin-bottom: var(--spacing-xs);
+}
+
+.item-detail-text {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
     cursor: pointer;
     transition: all var(--transition-normal);
     box-shadow: var(--shadow-md);

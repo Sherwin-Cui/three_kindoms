@@ -970,22 +970,21 @@ export class UserInterfaceManager {
             
             <div class="modal-body">
                 <div class="character-info-header">
-                    <div class="dialogue-avatar">${this.getAvatarText(character.name)}</div>
+                    <div class="dialogue-avatar character-avatar-large">${this.getAvatarText(character.name)}</div>
                     <div class="character-info-text">
                         <div class="character-info-name">${character.name}</div>
-                        <div class="character-info-title">${character.isPlayer ? '玩家角色' : 'NPC角色'}</div>
                     </div>
                 </div>
                 
                 <div class="character-info-content">
                     <div class="character-info-section">
-                        <h4>角色描述</h4>
+                        <h4 class="section-title-bordered">角色描述</h4>
                         <div class="character-description">${character.description}</div>
                     </div>
                     
                     ${attributesHtml ? `
                         <div class="character-info-section">
-                            <h4>当前属性</h4>
+                            <h4 class="section-title-bordered">当前属性</h4>
                             <div class="character-attributes">
                                 ${attributesHtml}
                             </div>

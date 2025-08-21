@@ -675,7 +675,6 @@ window.openItemsModal = function() {
                     ${itemsHTML}
                 </div>
                 <div class="item-details-section">
-                    <div class="item-details-header">道具详情</div>
                     <div class="item-details-content" id="item-details-content">
                         <div class="no-selection-message">请选择一个道具查看详情</div>
                     </div>
@@ -777,16 +776,16 @@ function updateItemDetailsDisplay(itemId, itemData) {
         <div class="item-detail-info">
             <div class="item-detail-name">${itemData.name || itemId}</div>
             <div class="item-detail-block">
-                <div class="item-detail-label">描述</div>
+                <div class="item-detail-label section-title-bordered">描述</div>
                 <div class="item-detail-text">${itemData.description || '神秘道具'}</div>
             </div>
             <div class="item-detail-block">
-                <div class="item-detail-label">效果</div>
+                <div class="item-detail-label section-title-bordered">效果</div>
                 <div class="item-detail-text">${effectDescription}</div>
             </div>
             ${itemData.usage ? `
                 <div class="item-detail-block">
-                    <div class="item-detail-label">使用方法</div>
+                    <div class="item-detail-label section-title-bordered">使用方法</div>
                     <div class="item-detail-text">${itemData.usage}</div>
                 </div>
             ` : ''}
@@ -1201,14 +1200,36 @@ class PageManager {
         this.currentPage = 'main';
     }
     
+    // 获取章节标题
+    getChapterTitle(chapterNum) {
+        const titles = {
+            1: '三日之约',
+            2: '天机暗算',
+            3: '雾锁长江'
+        };
+        return titles[chapterNum] || '';
+    }
+    
+    // 数字转中文
+    chineseNumber(num) {
+        const numbers = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+        return numbers[num] || num;
+    }
+    
     // 显示章节过渡页面
     showChapterTransition(type, chapterNum, content, onComplete) {
+        const chapterTitle = this.getChapterTitle(chapterNum);
         const transitionHtml = `
             <div class="chapter-transition" id="chapter-transition">
                 <div class="chapter-content">
-                    <div class="chapter-title">${type === 'opening' ? `第${chapterNum}章 开始` : `第${chapterNum}章 结束`}</div>
+                    <div class="chapter-title-container">
+                        <div class="chapter-number">第${this.chineseNumber(chapterNum)}章</div>
+                        ${chapterTitle ? `<div class="chapter-name">${chapterTitle}</div>` : ''}
+                    </div>
                     <div class="chapter-text" id="chapter-text-content"></div>
-                    <button class="continue-btn" onclick="continueFromTransition()" style="display: none;">继续</button>
+                    <div class="continue-btn-container" style="display: none;">
+                        <span class="continue-btn-text" onclick="continueFromTransition()">▶ 继续</span>
+                    </div>
                 </div>
             </div>
         `;
@@ -1222,19 +1243,19 @@ class PageManager {
         
         // 启动打字机效果
         const textElement = document.getElementById('chapter-text-content');
-        const continueBtn = document.querySelector('#chapter-transition .continue-btn');
+        const continueBtnContainer = document.querySelector('#chapter-transition .continue-btn-container');
         
         if (window.gameInstance?.typewriterManager && textElement) {
             window.gameInstance.typewriterManager.typeText(textElement, content, 80).then(() => {
                 // 打字完成后显示继续按钮
-                if (continueBtn) {
-                    continueBtn.style.display = 'block';
+                if (continueBtnContainer) {
+                    continueBtnContainer.style.display = 'flex';
                 }
             });
         } else {
             // 如果没有打字机管理器，直接显示文字
             if (textElement) textElement.textContent = content;
-            if (continueBtn) continueBtn.style.display = 'block';
+            if (continueBtnContainer) continueBtnContainer.style.display = 'flex';
         }
         
         this.onTransitionComplete = onComplete;
