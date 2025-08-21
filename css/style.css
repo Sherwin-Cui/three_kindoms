@@ -100,7 +100,8 @@
 
 body {
     font-family: 'DotGothic16', monospace, system-ui, -apple-system, sans-serif;
-    background: var(--bg-main);
+    background: url('../assets/images/bg/opening_bg.png') no-repeat center center fixed;
+    background-size: cover;
     color: var(--text-primary);
     line-height: 1.5;
     min-height: 100vh;
@@ -119,7 +120,7 @@ body {
     max-width: 450px;
     height: 100vh;
     margin: 0 auto;
-    background: var(--bg-main);
+    background: transparent;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -1091,6 +1092,8 @@ button {
     justify-content: center;
     z-index: 1000;
     overflow: hidden;
+    background: url('../assets/images/bg/opening_bg.png') no-repeat center center;
+    background-size: cover;
 }
 
 .start-screen-video {
