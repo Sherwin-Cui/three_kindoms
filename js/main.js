@@ -976,7 +976,7 @@ class MusicManager {
     
     // 尝试播放开场音乐
     tryPlayOpeningMusic() {
-        this.openingMusic.currentTime = 0;
+        this.openingMusic.currentTime = 2; // 从第2秒开始播放
         
         // 尝试播放音乐
         this.openingMusic.play().then(() => {
@@ -991,6 +991,7 @@ class MusicManager {
     // 设置用户交互监听器
     setupAudioInteractionListeners() {
         const enableAudioOnInteraction = () => {
+            this.openingMusic.currentTime = 2; // 确保从第2秒开始播放
             this.openingMusic.play().then(() => {
                 console.log('用户交互后音乐播放成功');
                 document.removeEventListener('click', enableAudioOnInteraction);
@@ -1166,15 +1167,16 @@ class SceneManager {
                 }
             },
             2: {
-                default: 'chapter2_workshop_day.png',
+                default: 'chapter2_observatory_night.png',
                 events: {
-                    'check_event2': 'chapter2_riverside_dusk.png'  // 智谋对决后切换到黄昏河边
+                    'check_event2': 'chapter2_riverside_dawn.png'  // 智谋对决后切换到河边黎明
                 }
             },
             3: {
-                default: 'chapter3_ship_deck_dawn.png',
+                default: 'chapter3_river_fog.png',
                 events: {
-                    'check_event3': 'chapter3_fog_battle.png'  // 夜间准备后切换到雾中作战
+                    'check_event4': 'chapter3_cao_camp.png',      // 掌控时机后切换到曹营
+                    'check_event5': 'chapter3_arrow_borrowing.png' // 安全撤退后切换到借箭场景
                 }
             }
         };
@@ -1182,6 +1184,8 @@ class SceneManager {
     
     // 初始化场景
     initScene(chapter) {
+        console.log(`初始化第${chapter}章场景`);
+        
         // 确保对话区域已找到
         if (!this.dialogueArea) {
             this.dialogueArea = document.getElementById('dialogue-area');
@@ -1189,7 +1193,10 @@ class SceneManager {
         
         const chapterMap = this.sceneMap[chapter];
         if (chapterMap && chapterMap.default) {
+            console.log(`设置默认场景: ${chapterMap.default}`);
             this.setScene(chapterMap.default);
+        } else {
+            console.warn(`第${chapter}章的场景配置未找到`);
         }
     }
     

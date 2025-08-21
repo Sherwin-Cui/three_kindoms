@@ -62,7 +62,10 @@ class PromptBuilder {
    * 获取系统设定
    */
   getSystemPrompt() {
-    return `## 系统设定
+    return `## 游戏背景
+建安十三年冬，曹操率八十万大军南下，兵锋直指江东。孙刘联盟初成，共御强敌。时诸葛孔明奉刘玄德之命，留驻东吴襄助破曹。然东吴大都督周公瑾，虽英姿勃发，才略过人，却心胸偏狭，见孔明智谋超群，恐日后为东吴之患，遂生妒贤之心。公瑾知孔明多智，欲除之而后快，却碍于盟约，不便明杀。遂设巧计，以军中急需弓箭为由，令孔明于三日内造箭十万支，违期则斩。此为借刀杀人之计，实欲致孔明于死地。然孔明何等人物，早已洞察周瑜心思，乃决定将计就计，既完成造箭任务，又不落人口舌，更要在此过程中化敌为友，为日后赤壁大战奠定基础。
+
+## 系统设定
 你是文字冒险游戏《草船借箭》的游戏主持人。你需要：
 1. 扮演所有NPC角色，保持其性格特征
 2. 根据玩家（诸葛亮）的言行判断NPC属性值的变化
@@ -146,16 +149,44 @@ class PromptBuilder {
   buildChapterEventsAndItemsSimple(chapterId) {
     const chapterData = {
       1: {
-        events: ["choice_event1", "dialogue_event2", "check_event1"],
-        items: ["militaryOrder", "dongwuTiger"]
+        events: [
+          { id: "choice_event1", name: "应对挑衅" },
+          { id: "dialogue_event2", name: "立下军令" },
+          { id: "check_event1", name: "说服鲁肃" }
+        ],
+        items: [
+          { id: "militaryOrder", name: "军令状" },
+          { id: "dongwuTiger", name: "东吴虎符" }
+        ]
       },
       2: {
-        events: ["dialogue_event3", "choice_event2", "check_event2", "dialogue_event4", "check_event3"],
-        items: ["sima", "confusionIncense", "grassman", "warDrum", "luSuLetter"]
+        events: [
+          { id: "dialogue_event3", name: "索要物资" },
+          { id: "choice_event2", name: "应对质疑" },
+          { id: "check_event2", name: "说服甘宁" },
+          { id: "dialogue_event4", name: "天机预测" },
+          { id: "check_event3", name: "观察天象" }
+        ],
+        items: [
+          { id: "sima", name: "司马罗盘" },
+          { id: "confusionIncense", name: "迷魂香" },
+          { id: "grassman", name: "草人" },
+          { id: "warDrum", name: "战鼓" },
+          { id: "luSuLetter", name: "鲁肃书信" }
+        ]
       },
       3: {
-        events: ["dialogue_event5", "choice_event3", "check_event4", "check_event5", "choice_event4", "dialogue_event7"],
-        items: ["windTalisman"]
+        events: [
+          { id: "dialogue_event5", name: "出发前动员" },
+          { id: "choice_event3", name: "应对曹兵" },
+          { id: "check_event4", name: "掌控时机" },
+          { id: "check_event5", name: "安全撤退" },
+          { id: "choice_event4", name: "面对追击" },
+          { id: "dialogue_event7", name: "周瑜认输" }
+        ],
+        items: [
+          { id: "windTalisman", name: "风符" }
+        ]
       }
     };
     
@@ -163,8 +194,14 @@ class PromptBuilder {
     if (!data) return '';
     
     let section = `\n\n### 本章可触发内容`;
-    section += `\n**事件ID列表：** ${data.events.join(', ')}`;
-    section += `\n**道具ID列表：** ${data.items.join(', ')}`;
+    
+    // 格式化事件列表
+    const eventList = data.events.map(event => `${event.id}(${event.name})`).join(', ');
+    section += `\n**事件ID列表：** ${eventList}`;
+    
+    // 格式化道具列表
+    const itemList = data.items.map(item => `${item.id}(${item.name})`).join(', ');
+    section += `\n**道具ID列表：** ${itemList}`;
     
     return section;
   }
