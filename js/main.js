@@ -818,9 +818,31 @@ function getItemEffectDescription(itemData) {
         return '暂无特殊效果';
     }
     
-    // 直接返回道具的effect字段，这是道具的作用描述
-    if (itemData.effect) {
+    // 如果effect是字符串，直接返回
+    if (typeof itemData.effect === 'string') {
         return itemData.effect;
+    }
+    
+    // 如果effect是对象，根据类型生成描述
+    if (itemData.effect && typeof itemData.effect === 'object') {
+        const effect = itemData.effect;
+        
+        if (effect.type === 'checkBonus') {
+            const targetName = {
+                'eloquence': '口才',
+                'intelligence': '智力',
+                'wisdom': '智慧'
+            }[effect.target] || effect.target;
+            
+            return `检定时${targetName}+${effect.value}`;
+        }
+        
+        if (effect.description) {
+            return effect.description;
+        }
+        
+        // 其他对象类型，尝试生成描述
+        return '特殊效果';
     }
     
     // 如果没有effect字段，尝试从effects对象构建描述
@@ -1369,9 +1391,14 @@ class SceneManager {
     
     // 基于事件触发场景切换
     triggerSceneChange(eventId, chapter) {
+        console.log(`🎬 尝试触发场景切换: 事件=${eventId}, 章节=${chapter}`);
+        
         const chapterMap = this.sceneMap[chapter];
         if (chapterMap && chapterMap.events && chapterMap.events[eventId]) {
+            console.log(`🎬 找到场景映射: ${chapterMap.events[eventId]}`);
             this.setScene(chapterMap.events[eventId]);
+        } else {
+            console.log(`🎬 未找到场景映射 - 章节映射:`, chapterMap);
         }
     }
     

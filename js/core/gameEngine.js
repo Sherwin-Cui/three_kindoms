@@ -92,6 +92,15 @@ export class GameEngine {
                 return { trigger: false };
             }
             
+            // 标记事件已触发
+            this.stateManager.triggerEvent(eventName);
+            
+            // 触发场景切换（如果配置了）
+            if (window.gameInstance?.sceneManager) {
+                const currentChapter = gameState.chapter || 1;
+                window.gameInstance.sceneManager.triggerSceneChange(eventName, currentChapter);
+            }
+            
             return {
                 trigger: true,
                 id: eventData.id,
@@ -162,6 +171,12 @@ export class GameEngine {
             
             // 标记事件已触发
             this.stateManager.triggerEvent(eventName);
+            
+            // 触发场景切换（如果配置了）
+            if (window.gameInstance?.sceneManager) {
+                const currentChapter = gameState.chapter || 1;
+                window.gameInstance.sceneManager.triggerSceneChange(eventName, currentChapter);
+            }
             
             return {
                 trigger: true,
