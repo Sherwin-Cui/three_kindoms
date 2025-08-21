@@ -960,12 +960,73 @@ class MusicManager {
         this.currentTrack = this.openingMusic;
         this.currentMode = 'opening';
         
-        this.openingMusic.currentTime = 0;
-        this.openingMusic.play().catch(e => {
-            console.warn('播放开场音乐失败:', e);
-        });
+        // 检查音频文件是否加载成功
+        if (this.openingMusic.readyState === 0) {
+            console.log('音频文件正在加载中...');
+            this.openingMusic.addEventListener('loadeddata', () => {
+                this.tryPlayOpeningMusic();
+            }, { once: true });
+            this.openingMusic.load(); // 强制加载
+        } else {
+            this.tryPlayOpeningMusic();
+        }
         
         console.log('播放开场音乐');
+    }
+    
+    // 尝试播放开场音乐
+    tryPlayOpeningMusic() {
+        this.openingMusic.currentTime = 0;
+        
+        // 创建用户交互事件监听器
+        const playAudio = () => {
+            this.openingMusic.play().then(() => {
+                console.log('开场音乐播放成功');
+            }).catch(e => {
+                console.warn('播放开场音乐失败:', e);
+                // 如果自动播放失败，提示用户点击播放
+                this.showAudioPlayPrompt();
+            });
+        };
+        
+        // 尝试直接播放
+        playAudio();
+        
+        // 如果直接播放失败，等待用户交互
+        const enableAudioOnInteraction = () => {
+            playAudio();
+            document.removeEventListener('click', enableAudioOnInteraction);
+            document.removeEventListener('keydown', enableAudioOnInteraction);
+        };
+        
+        document.addEventListener('click', enableAudioOnInteraction);
+        document.addEventListener('keydown', enableAudioOnInteraction);
+    }
+    
+    // 显示音频播放提示
+    showAudioPlayPrompt() {
+        const promptDiv = document.createElement('div');
+        promptDiv.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 10000;
+            font-family: Arial, sans-serif;
+        `;
+        promptDiv.innerHTML = `
+            <p>浏览器需要用户交互才能播放音频</p>
+            <button onclick="this.parentElement.remove(); window.musicManager.tryPlayOpeningMusic();" 
+                    style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                点击播放音乐
+            </button>
+        `;
+        document.body.appendChild(promptDiv);
     }
     
     // 播放游戏音乐（对话界面）
