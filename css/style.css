@@ -100,8 +100,7 @@
 
 body {
     font-family: 'DotGothic16', monospace, system-ui, -apple-system, sans-serif;
-    background: url('../assets/images/bg/opening_bg.png') no-repeat center center fixed;
-    background-size: cover;
+    background: var(--bg-main);
     color: var(--text-primary);
     line-height: 1.5;
     min-height: 100vh;
@@ -120,7 +119,7 @@ body {
     max-width: 450px;
     height: 100vh;
     margin: 0 auto;
-    background: transparent;
+    background: var(--bg-main);
     position: relative;
     display: flex;
     flex-direction: column;
@@ -364,7 +363,7 @@ header h1 {
 #dialogue-area,
 #avg-dialogue-area {
     flex: 1;
-    background: var(--bg-main);
+    background: transparent;
     padding: var(--spacing-lg);
     overflow-y: auto;
     scrollbar-width: none;
@@ -474,11 +473,11 @@ header h1 {
     color: var(--text-primary);
     font-size: var(--font-sm);
     font-weight: normal;
-    /* 系统消息：只有文字，居中显示，内容自适应宽度 */
+    /* 系统消息：只有文字，左对齐显示，内容自适应宽度 */
     display: flex !important;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    text-align: center;
+    text-align: left;
     max-width: 100% !important;
     width: fit-content !important;
     min-height: 40px;
@@ -780,7 +779,10 @@ button {
 .event-dialog,
 .item-gained-dialog,
 .confirm-dialog {
-    background: var(--bg-main);
+    background: 
+        linear-gradient(rgba(245, 242, 232, 0.5), rgba(245, 242, 232, 0.5)),
+        url('../assets/images/bg/opening_bg.png') no-repeat center center;
+    background-size: cover;
     width: 90%;
     max-width: 420px;
     max-height: 80vh;
@@ -818,7 +820,7 @@ button {
 .modal-header,
 .items-modal-header {
     padding: var(--spacing-lg);
-    background: var(--bg-accent);
+    background: transparent;
     border-bottom: 3px solid var(--border-outer);
     display: flex;
     justify-content: space-between;
@@ -886,7 +888,7 @@ button {
     padding: var(--spacing-xl);
     overflow-y: auto;
     max-height: calc(80vh - 120px);
-    background: var(--bg-main);
+    background: transparent;
 }
 
 /* 道具模态框特殊样式 */
@@ -905,7 +907,7 @@ button {
     padding: var(--spacing-md);
     border-right: 2px solid var(--border-outer);
     overflow-y: auto;
-    background: var(--bg-accent);
+    background: transparent;
 }
 
 .item-card {
@@ -961,7 +963,7 @@ button {
 .item-details-section {
     flex: 1;
     padding: var(--spacing-xl);
-    background: var(--bg-main);
+    background: transparent;
 }
 
 .item-details-content {
@@ -977,7 +979,7 @@ button {
 
 .items-modal-buttons,
 .modal-buttons {
-    background: var(--bg-accent);
+    background: transparent;
     padding: var(--spacing-lg);
     display: flex;
     gap: var(--spacing-sm);
@@ -1092,8 +1094,8 @@ button {
     justify-content: center;
     z-index: 1000;
     overflow: hidden;
-    background: url('../assets/images/bg/opening_bg.png') no-repeat center center;
-    background-size: cover;
+    background: url('../assets/images/bg/opening_bg.png') no-repeat center center !important;
+    background-size: cover !important;
 }
 
 .start-screen-video {
@@ -1190,7 +1192,8 @@ button {
     left: 0;
     right: 0;
     bottom: 0;
-    background: var(--bg-main);
+    background: url('../assets/images/bg/opening_bg.png') no-repeat center center;
+    background-size: cover;
     display: flex;
     align-items: center;
     justify-content: center;

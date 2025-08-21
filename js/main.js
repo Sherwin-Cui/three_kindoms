@@ -268,7 +268,7 @@ class Game {
                     if (itemUseResult.success) {
                         // 道具使用成功，显示道具使用反馈
                         if (itemUseResult.data && itemUseResult.data.narrative) {
-                            this.uiManager.addDialogue('system', '', itemUseResult.data.narrative);
+                            this.uiManager.addDialogue('system', '', itemUseResult.data.narrative, true);
                         }
                         
                         // 更新UI状态（移除消耗性道具等）
@@ -311,32 +311,54 @@ class Game {
     // useItem方法已移除，现在通过selectItem选择道具，在sendMessage时一起发送
     
     handleGameResponse(response) {
-        // 显示叙述文本
-        if (response.narrative) {
-            this.uiManager.addDialogue('system', '', response.narrative);
+        // 处理场景切换
+        if (response.scene) {
+            console.log(`🎬 AI请求场景切换: ${response.scene}`);
+            this.sceneManager.setScene(response.scene + '.png');
         }
         
-        // 显示NPC对话（使用打字机效果）
-        let npcDialoguePromise = Promise.resolve();
-        if (response.npc_dialogue) {
-            npcDialoguePromise = new Promise((resolve) => {
+        // 先显示叙述文本，等待完成后再显示NPC对话
+        let narrativePromise = Promise.resolve();
+        if (response.narrative) {
+            narrativePromise = new Promise((resolve) => {
+                this.uiManager.addDialogue('system', '', response.narrative, true);
+                
+                // 等待系统消息打字机动画完成
                 setTimeout(() => {
-                    // 添加对话并等待打字机动画完成
-                    const messageElement = this.uiManager.addDialogue('npc', response.npc_dialogue.speaker, response.npc_dialogue.content, true);
-                    
-                    // 等待打字机动画完成
-                    setTimeout(() => {
-                        // 检查打字机动画是否完成
-                        const checkAnimation = setInterval(() => {
-                            if (!this.typewriterManager.isAnimating()) {
-                                clearInterval(checkAnimation);
-                                resolve();
-                            }
-                        }, 100);
-                    }, 500); // 给打字机动画一点启动时间
-                }, 1000);
+                    const checkAnimation = setInterval(() => {
+                        if (!this.typewriterManager.isAnimating()) {
+                            clearInterval(checkAnimation);
+                            resolve();
+                        }
+                    }, 50);
+                }, 100);
             });
         }
+        
+        // 显示NPC对话（在叙述文本完成后）
+        let npcDialoguePromise = narrativePromise.then(() => {
+            if (response.npc_dialogue) {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        // 添加对话并等待打字机动画完成
+                        const messageElement = this.uiManager.addDialogue('npc', response.npc_dialogue.speaker, response.npc_dialogue.content, true);
+                        
+                        // 等待打字机动画完成
+                        setTimeout(() => {
+                            // 检查打字机动画是否完成
+                            const checkAnimation = setInterval(() => {
+                                if (!this.typewriterManager.isAnimating()) {
+                                    clearInterval(checkAnimation);
+                                    resolve();
+                                }
+                            }, 100);
+                        }, 500); // 给打字机动画一点启动时间
+                    }, 1000);
+                });
+            } else {
+                return Promise.resolve();
+            }
+        });
         
         // 等待NPC对话打字机动画完成后，再处理弹窗
         npcDialoguePromise.then(() => {
@@ -478,7 +500,7 @@ class Game {
     
     handleError(error) {
         console.error('游戏错误:', error);
-        this.uiManager.addDialogue('system', '', `系统提示：${error}`);
+        this.uiManager.addDialogue('system', '', `系统提示：${error}`, true);
     }
     
     handleGameEnd(result) {
@@ -1323,27 +1345,11 @@ class SceneManager {
         this.dialogueArea = null; // 将在初始化时设置
         this.currentScene = null;
         
-        // 场景映射：章节 -> 默认场景 -> 事件触发场景
-        this.sceneMap = {
-            1: {
-                default: 'chapter1_council_hall.png',
-                events: {
-                    'check_event1': 'chapter1_tent_night.png'  // 说服鲁肃后切换到夜晚帐篷
-                }
-            },
-            2: {
-                default: 'chapter2_observatory_night.png',
-                events: {
-                    'check_event2': 'chapter2_riverside_dawn.png'  // 智谋对决后切换到河边黎明
-                }
-            },
-            3: {
-                default: 'chapter3_river_fog.png',
-                events: {
-                    'check_event4': 'chapter3_cao_camp.png',      // 掌控时机后切换到曹营
-                    'check_event5': 'chapter3_arrow_borrowing.png' // 安全撤退后切换到借箭场景
-                }
-            }
+        // 默认场景映射（简化）
+        this.defaultScenes = {
+            1: 'chapter1_council_hall.png',
+            2: 'chapter2_observatory_night.png', 
+            3: 'chapter3_river_fog.png'
         };
     }
     
@@ -1356,18 +1362,23 @@ class SceneManager {
             this.dialogueArea = document.getElementById('dialogue-area');
         }
         
-        const chapterMap = this.sceneMap[chapter];
-        if (chapterMap && chapterMap.default) {
-            console.log(`设置默认场景: ${chapterMap.default}`);
-            this.setScene(chapterMap.default);
+        const defaultScene = this.defaultScenes[chapter];
+        if (defaultScene) {
+            console.log(`设置默认场景: ${defaultScene}`);
+            this.setScene(defaultScene);
         } else {
-            console.warn(`第${chapter}章的场景配置未找到`);
+            console.warn(`第${chapter}章的默认场景未找到`);
         }
     }
     
     // 设置场景背景
     setScene(sceneName) {
-        if (this.currentScene === sceneName) return;
+        console.log(`🎬 尝试设置场景: ${sceneName}，当前场景: ${this.currentScene}`);
+        
+        if (this.currentScene === sceneName) {
+            console.log(`🎬 场景已经是 ${sceneName}，强制重新设置以确保生效`);
+            // 不要跳过，强制重新设置
+        }
         
         // 确保对话区域已找到
         if (!this.dialogueArea) {
@@ -1375,32 +1386,23 @@ class SceneManager {
         }
         
         if (!this.dialogueArea) {
-            console.warn('对话区域未找到，无法设置场景背景');
+            console.warn('🎬 对话区域未找到，无法设置场景背景');
             return;
         }
         
         const scenePath = `assets/images/scenes/${sceneName}`;
+        console.log(`🎬 设置场景背景路径: ${scenePath}`);
+        
         this.dialogueArea.style.backgroundImage = `url('${scenePath}')`;
         this.dialogueArea.style.backgroundSize = 'cover';
         this.dialogueArea.style.backgroundPosition = 'center';
         this.dialogueArea.style.backgroundRepeat = 'no-repeat';
         this.currentScene = sceneName;
         
-        console.log(`场景切换到: ${sceneName}`);
+        console.log(`🎬 场景切换完成: ${sceneName}`);
+        console.log(`🎬 对话区域背景样式:`, this.dialogueArea.style.backgroundImage);
     }
     
-    // 基于事件触发场景切换
-    triggerSceneChange(eventId, chapter) {
-        console.log(`🎬 尝试触发场景切换: 事件=${eventId}, 章节=${chapter}`);
-        
-        const chapterMap = this.sceneMap[chapter];
-        if (chapterMap && chapterMap.events && chapterMap.events[eventId]) {
-            console.log(`🎬 找到场景映射: ${chapterMap.events[eventId]}`);
-            this.setScene(chapterMap.events[eventId]);
-        } else {
-            console.log(`🎬 未找到场景映射 - 章节映射:`, chapterMap);
-        }
-    }
     
     // 清除场景背景
     clearScene() {

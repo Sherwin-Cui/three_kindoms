@@ -10,6 +10,7 @@ class PromptBuilder {
   constructor() {
     this.systemPrompt = this.getSystemPrompt();
     this.gameBackground = this.getGameBackground();
+    this.sceneList = this.getSceneList();
   }
 
   /**
@@ -27,6 +28,9 @@ class PromptBuilder {
     // 添加当前章节信息
     prompt += `\n\n## 当前章节：第${chapter.id}章 ${chapter.title}`;
     prompt += `\n\n### 章节梗概\n${chapter.plotSummary}`;
+    
+    // 添加场景信息
+    prompt += this.buildSceneSection(gameState.chapter);
     
     // 添加本章可触发的事件和道具ID列表
     prompt += this.buildChapterEventsAndItemsSimple(chapter.id);
@@ -75,6 +79,30 @@ class PromptBuilder {
   }
 
   /**
+   * 获取场景列表
+   */
+  getSceneList() {
+    return {
+      // 第一章场景
+      'chapter1_council_hall': '议事厅 - 东吴军议大厅，周瑜在此主持军议',
+      'chapter1_tent_night': '夜晚帐篷 - 诸葛亮的临时住所，夜深人静适合密谈',
+      'chapter1_quarters': '客房 - 东吴为诸葛亮安排的住所',
+      
+      // 第二章场景  
+      'chapter2_riverside_dawn': '江边黎明 - 长江边的僻静之处，适合秘密筹划',
+      'chapter2_observatory_night': '观星台夜晚 - 高处观星台，可观天象预测天气',
+      'chapter2_storage': '军械库 - 存放军用物资的地方',
+      'chapter2_camp': '军营 - 东吴军营，士兵活动的地方',
+      
+      // 第三章场景
+      'chapter3_river_fog': '大雾江面 - 浓雾弥漫的长江水面，视线模糊',
+      'chapter3_cao_camp': '曹营水寨 - 曹操军队的水上营寨',
+      'chapter3_arrow_borrowing': '草船借箭 - 船只靠近曹营射箭的场面',
+      'chapter3_return_triumph': '凯旋归来 - 成功借箭后返回东吴的场景'
+    };
+  }
+
+  /**
    * 获取游戏背景
    */
   getGameBackground() {
@@ -110,6 +138,33 @@ class PromptBuilder {
       "水寨": ["ganNing"]
     };
     return sceneNPCs[scene] || [];
+  }
+
+  /**
+   * 构建场景信息部分
+   * @param {number} chapter - 当前章节
+   * @returns {string} 场景信息文本
+   */
+  buildSceneSection(chapter) {
+    let section = `\n\n### 可用场景列表`;
+    
+    // 获取当前章节的场景
+    const chapterScenes = Object.entries(this.sceneList)
+      .filter(([sceneId]) => sceneId.startsWith(`chapter${chapter}_`));
+    
+    section += `\n以下是第${chapter}章可用的场景：`;
+    chapterScenes.forEach(([sceneId, description]) => {
+      section += `\n- **${sceneId}**: ${description}`;
+    });
+    
+    section += `\n\n**场景选择规则：**`;
+    section += `\n1. 军议、正式对话 → 选择议事厅类场景`;
+    section += `\n2. 私密谈话、密谋 → 选择帐篷、客房类场景`;  
+    section += `\n3. 筹划准备、观察 → 选择江边、观星台类场景`;
+    section += `\n4. 行动执行、冒险 → 选择江面、营寨类场景`;
+    section += `\n5. 根据时间和剧情需要选择合适的场景，营造氛围`;
+    
+    return section;
   }
 
   /**
@@ -401,7 +456,7 @@ class PromptBuilder {
    * 获取输出要求
    */
   getOutputRequirements() {
-    return `\n\n## 输出要求\n**根据当前的对话历史判断，你应该如何安排旁白和出场人物的发言顺序和内容以及数值变化。**\n请根据当前情况，以JSON格式输出：\n{\n  "narrative": "环境描述和剧情推进的叙述文本",\n  "npc_dialogue": {\n    "speaker": "NPC名字",\n    "content": "对话内容"\n  },\n  "value_changes": {\n    "npcName": {\n      "attribute": "±数值"\n    }\n  },\n  "special_progress": {\n    "progressName": "±数值"\n  },\n  "event_suggestion": {\n    "should_trigger": true/false,\n    "event_id": "事件ID",\n    "reason": "触发理由"\n  },\n  "item_grant": {\n    "should_grant": true/false,\n    "item_id": "道具ID",\n    "condition_met": "条件说明"\n  },\n  "gameEndJudgment": {\n    "isEnd": true/false,\n    "endType": "Success或Failure",\n    "reason": "结局判定的详细原因"\n  }\n}\n\n**重要说明：**\n- event_suggestion字段：当需要触发事件时，设置should_trigger为true，并提供事件ID和触发理由\n- item_grant字段：当需要获得道具时，设置should_grant为true，并提供道具ID和条件说明\n- special_progress字段：用于更新特殊进度值，如preparationProgress等\n- gameEndJudgment字段：**你负责成功结局的判定！**当剧情自然发展到可以成功结束时，必须输出成功结局判定\n  * 系统只负责失败条件的检查（如数值过低、时间耗尽等）\n  * 成功结局必须由你来判定，特别是第三章，当草船借箭任务成功完成时\n  * 判定成功时设置isEnd=true, endType="Success"，并详细说明成功的原因\n- 如果不需要触发事件或获得道具，对应字段可以省略或设为null`;
+    return `\n\n## 输出要求\n**根据当前的对话历史判断，你应该如何安排旁白和出场人物的发言顺序和内容以及数值变化。**\n请根据当前情况，以JSON格式输出：\n{\n  "scene": "场景ID（从上面的场景列表中选择合适的场景）",\n  "narrative": "环境描述和剧情推进的叙述文本",\n  "npc_dialogue": {\n    "speaker": "NPC名字",\n    "content": "对话内容"\n  },\n  "value_changes": {\n    "npcName": {\n      "attribute": "±数值"\n    }\n  },\n  "special_progress": {\n    "progressName": "±数值"\n  },\n  "event_suggestion": {\n    "should_trigger": true/false,\n    "event_id": "事件ID",\n    "reason": "触发理由"\n  },\n  "item_grant": {\n    "should_grant": true/false,\n    "item_id": "道具ID",\n    "condition_met": "条件说明"\n  },\n  "gameEndJudgment": {\n    "isEnd": true/false,\n    "endType": "Success或Failure",\n    "reason": "结局判定的详细原因"\n  }\n}\n\n**重要说明：**\n- **scene字段：**必须从上面提供的场景列表中选择一个合适的场景ID，根据当前剧情和对话内容判断最适合的场景\n- event_suggestion字段：当需要触发事件时，设置should_trigger为true，并提供事件ID和触发理由\n- item_grant字段：当需要获得道具时，设置should_grant为true，并提供道具ID和条件说明\n- special_progress字段：用于更新特殊进度值，如preparationProgress等\n- gameEndJudgment字段：**你负责成功结局的判定！**当剧情自然发展到可以成功结束时，必须输出成功结局判定\n  * 系统只负责失败条件的检查（如数值过低、时间耗尽等）\n  * 成功结局必须由你来判定，特别是第三章，当草船借箭任务成功完成时\n  * 判定成功时设置isEnd=true, endType="Success"，并详细说明成功的原因\n- 如果不需要触发事件或获得道具，对应字段可以省略或设为null`;
   }
 
   /**

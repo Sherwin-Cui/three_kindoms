@@ -169,6 +169,7 @@ export class AIManager {
         
         // 检查是否提到鲁肃相关内容，触发检定事件1
         if (prompt.includes('鲁肃') || prompt.includes('子敬') || prompt.includes('说服') || prompt.includes('夜访')) {
+            
             const luSuResponse = {
                 narrative: "夜深人静，鲁肃悄然来到你的住处。烛光摇曳间，故人相对而坐。",
                 npc_dialogue: {

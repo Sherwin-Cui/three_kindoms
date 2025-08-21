@@ -95,11 +95,6 @@ export class GameEngine {
             // 标记事件已触发
             this.stateManager.triggerEvent(eventName);
             
-            // 触发场景切换（如果配置了）
-            if (window.gameInstance?.sceneManager) {
-                const currentChapter = gameState.chapter || 1;
-                window.gameInstance.sceneManager.triggerSceneChange(eventName, currentChapter);
-            }
             
             return {
                 trigger: true,
@@ -172,11 +167,6 @@ export class GameEngine {
             // 标记事件已触发
             this.stateManager.triggerEvent(eventName);
             
-            // 触发场景切换（如果配置了）
-            if (window.gameInstance?.sceneManager) {
-                const currentChapter = gameState.chapter || 1;
-                window.gameInstance.sceneManager.triggerSceneChange(eventName, currentChapter);
-            }
             
             return {
                 trigger: true,
@@ -247,11 +237,6 @@ export class GameEngine {
             this.stateManager.triggerEvent(eventName + '_great_success');
         }
         
-        // 成功时触发场景切换
-        if (checkResult.success && window.gameInstance?.sceneManager) {
-            const currentChapter = this.stateManager.getState().chapter || 1;
-            window.gameInstance.sceneManager.triggerSceneChange(eventName, currentChapter);
-        }
                 
         // 应用检定结果的效果
         const effects = checkResult.success ? eventData.successEffects : eventData.failureEffects;
