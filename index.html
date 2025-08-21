@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>草船借箭-第一章-三日之约</title>
+    <link rel="stylesheet" href="css/style.css?v=8.4&typewriter-opening">
+    <style>
+    /* 已修复：对话气泡宽度现在会根据内容自适应 */
+    /* 强制覆盖数值字体大小 */
+    .status-item .value {
+        font-size: 0.875rem !important;
+    }
+    /* AI思考气泡样式 */
+    .ai-thinking-text {
+        color: #5A5245;
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+    /* 选择事件按钮样式 */
+    .choice-btn {
+        display: block !important;
+        width: 100% !important;
+        margin: var(--spacing-sm) 0 !important;
+        background: transparent !important;
+        border: 2px solid var(--border-outer) !important;
+    }
+    /* 状态栏图标样式 */
+    .status-icon {
+        width: 16px;
+        height: 16px;
+        margin-right: 4px;
+        vertical-align: middle;
+    }
+    /* 人物头像图片样式 */
+    .character-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+    .avatar-container {
+        overflow: hidden;
+    }
+    /* 道具卡片样式 - 使用button1.png背景 */
+    .item-card {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 8px 12px !important;
+        background: url('assets/images/tank/button1.png') no-repeat center !important;
+        background-size: 100% 100% !important;
+        border: none !important;
+        height: 60px !important;
+        min-width: 120px !important;
+        box-shadow: none !important;
+        margin-bottom: 8px !important;
+    }
+    .item-card.selected {
+        background: url('assets/images/tank/button1.png') no-repeat center !important;
+        background-size: 100% 100% !important;
+        transform: scale(1.05) !important;
+    }
+    .item-card:hover {
+        transform: scale(1.02) !important;
+        background: url('assets/images/tank/button1.png') no-repeat center !important;
+        background-size: 100% 100% !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    .item-image {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+    }
+    .item-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+    .item-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        line-height: 1.2;
+    }
+    .item-name-line1, .item-name-line2 {
+        font-size: 12px;
+        font-weight: normal;
+        color: var(--text-primary);
+        text-align: center;
+        margin: 0;
+        height: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .item-name-line2 {
+        margin-top: 2px;
+    }
+    .avatar-fallback {
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+        line-height: 40px;
+        text-align: center;
+        font-weight: normal;
+    }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- 游戏开始页面 -->
+        <div id="start-screen" class="start-screen">
+            <video class="start-screen-video" autoplay muted loop>
+                <source src="assets/Videos/opening.mp4" type="video/mp4">
+            </video>
+            <div class="start-screen-content">
+                <div class="game-title">
+                    <img src="assets/images/title.png" alt="草船借箭" class="title-image">
+                </div>
+                <div class="start-buttons">
+                    <button class="start-btn" onclick="startGame()">开始游戏</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主游戏界面 -->
+        <div id="main-game" class="main-game" style="display: none;">
+            <header>
+                <h1>第一章-三日之约</h1>
+            </header>
+        
+        <div id="status-bar">
+            <!-- 第一章状态栏 -->
+            <div class="status-item chapter1-status">
+                <img src="assets/images/icons/icon_suspicion.png" class="status-icon" alt="猜忌">
+                <span class="label">猜忌：</span>
+                <span id="suspicion" class="value">50</span>
+            </div>
+            <div class="status-item chapter1-status">
+                <img src="assets/images/icons/icon_trust.png" class="status-icon" alt="信任">
+                <span class="label">信任：</span>
+                <span id="trust" class="value">50</span>
+            </div>
+            <div class="status-item">
+                <img src="assets/images/icons/icon_time.png" class="status-icon" alt="时间">
+                <span class="label">时间：</span>
+                <span id="time-progress" class="value">第1日</span>
+            </div>
+            
+            <!-- 第二章状态栏 -->
+            <div class="status-item chapter2-status" style="display: none;">
+                <img src="assets/images/icons/icon_preparation.png" class="status-icon" alt="准备">
+                <span class="label">准备：</span>
+                <span id="preparation-progress" class="value">0</span>
+            </div>
+            
+            <!-- 第三章状态栏 -->
+            <div class="status-item chapter3-status" style="display: none;">
+                <img src="assets/images/icons/icon_danger.png" class="status-icon" alt="危险">
+                <span class="label">危险：</span>
+                <span id="danger-level" class="value">0</span>
+            </div>
+            <div class="status-item chapter3-status" style="display: none;">
+                <img src="assets/images/icons/icon_morale.png" class="status-icon" alt="士气">
+                <span class="label">士气：</span>
+                <span id="soldier-morale" class="value">50</span>
+            </div>
+            <div class="status-item chapter3-status" style="display: none;">
+                <img src="assets/images/icons/icon_danger.png" class="status-icon" alt="损失">
+                <span class="label">损失：</span>
+                <span id="ship-loss" class="value">0</span>
+            </div>
+            <div class="status-item chapter3-status" style="display: none;">
+                <img src="assets/images/icons/icon_arrows.png" class="status-icon" alt="箭支">
+                <span class="label">箭支：</span>
+                <span id="arrow-count" class="value">0</span>
+            </div>
+        </div>
+        
+        <div id="character-avatars">
+            <div class="characters-grid">
+                <div class="character-avatar" data-character="zhugeLiang">
+                    <div class="avatar-container">
+                        <img src="assets/images/characters/zhuge_liang.png" class="character-image" alt="诸葛亮">
+                    </div>
+                </div>
+                <div class="character-avatar" data-character="zhouYu">
+                    <div class="avatar-container">
+                        <img src="assets/images/characters/zhou_yu.png" class="character-image" alt="周瑜">
+                    </div>
+                </div>
+                <div class="character-avatar" data-character="luSu">
+                    <div class="avatar-container">
+                        <img src="assets/images/characters/lu_su.png" class="character-image" alt="鲁肃">
+                    </div>
+                </div>
+                <div class="character-avatar" data-character="ganNing">
+                    <div class="avatar-container">
+                        <img src="assets/images/characters/gan_ning.png" class="character-image" alt="甘宁">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="dialogue-area">
+            <!-- 对话内容将由JavaScript动态添加 -->
+        </div>
+        
+        <!-- 选中道具标签 -->
+        <div id="selected-item-tag" style="display: none;">
+            <span class="selected-item-text">已选择: <span id="selected-item-name"></span></span>
+            <button class="cancel-item-btn" data-action="cancel-item">×</button>
+        </div>
+        
+        <div id="input-area">
+            <input type="text" id="player-input" placeholder="请输入你的话语或行动..." maxlength="200">
+            <button id="items-btn" data-action="open-items">道具</button>
+            <button id="send-btn" data-action="send-message">发送</button>
+        </div>
+        </div>
+    </div>
+    
+    <script src="js/utils/testUtils.js?v=6.0"></script>
+    <script src="js/main.js?v=6.0" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块加载测试</title>
+</head>
+<body>
+    <div id="test-output"></div>
+    
+    <script type="module">
+        console.log('开始测试模块加载...');
+        
+        try {
+            // 测试gameData模块
+            const gameDataModule = await import('./js/data/gameData.js');
+            console.log('✓ gameData.js 加载成功');
+            
+            // 测试StateManager模块
+            const stateModule = await import('./js/core/stateManager.js');
+            console.log('✓ stateManager.js 加载成功');
+            
+            // 测试AIManager模块
+            const aiModule = await import('./js/core/aiManager.js');
+            console.log('✓ aiManager.js 加载成功');
+            
+            // 测试GameEngine模块  
+            const engineModule = await import('./js/core/gameEngine.js');
+            console.log('✓ gameEngine.js 加载成功');
+            
+            // 测试UIManager模块
+            const uiModule = await import('./js/ui/UserInterfaceManager.js');
+            console.log('✓ UserInterfaceManager.js 加载成功');
+            
+            // 测试main.js模块
+            const mainModule = await import('./js/main.js');
+            console.log('✓ main.js 加载成功');
+            
+            document.getElementById('test-output').innerHTML = '<p style="color: green;">所有模块加载成功！请查看控制台了解详细信息。</p>';
+            
+        } catch (error) {
+            console.error('模块加载失败:', error);
+            document.getElementById('test-output').innerHTML = `<p style="color: red;">模块加载失败: ${error.message}</p>`;
+        }
+    </script>
+</body>
+</html>

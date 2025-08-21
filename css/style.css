@@ -1,0 +1,1296 @@
+/* 草船借箭 - 游戏样式（新UI系统） */
+
+/* ========================================
+   字体导入
+   ======================================== */
+
+@font-face {
+    font-family: 'DotGothic16';
+    src: url('../assets/font/DotGothic16/DotGothic16-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ========================================
+   CSS变量定义 - 增强卡其色和绿色配色
+   ======================================== */
+
+:root {
+    /* ===== 核心配色系统 - 增强版 ===== */
+    /* 主背景色 - 卡其色系 */
+    --bg-main: #F5F2E8;           /* 玉白色 - 主背景 */
+    --bg-secondary: #E8DCC8;      /* 卡其色 - 次级背景（加深） */
+    --bg-accent: #DCC8A8;         /* 深卡其 - 强调背景 */
+    --bg-overlay: #FAF8F3;        /* 极浅色 - 悬浮层背景 */
+    
+    /* 边框装饰色 - 增强绿色使用 */
+    --border-outer: #2D3A2D;      /* 墨绿色 - 主要边框 */
+    --border-green: #3A4A3A;      /* 中绿色 - 次要边框 */
+    --border-light-green: #4A5A4A;/* 浅绿色 - 装饰边框 */
+    --border-middle: #C8A878;     /* 卡其色 - 装饰边框（加深） */
+    --border-inner: #B8986B;      /* 棕色 - 内边框 */
+    --border-accent: #A88858;     /* 深卡其 - 强调边框 */
+    
+    /* 文字色彩 */
+    --text-primary: #2D3A2D;      /* 墨绿色 - 主文字 */
+    --text-secondary: #5A5245;    /* 深褐色 - 次要文字 */
+    --text-light: #8B7F6B;        /* 浅褐色 - 辅助文字 */
+    --text-white: #FDFCFA;        /* 白色文字 - 用于深色背景 */
+    
+    /* 功能色 - 卡其色调 */
+    --status-success: #E8F0E8;    /* 淡绿卡其 */
+    --status-warning: #F0E8D8;    /* 淡黄卡其 */
+    --status-danger: #F0E0D8;     /* 淡红卡其 */
+    --status-info: #E0E8E8;       /* 淡青卡其 */
+    
+    /* 阴影系统 - 使用墨绿色 */
+    --shadow-xs: 0 1px 2px rgba(45, 58, 45, 0.08);
+    --shadow-sm: 0 2px 4px rgba(45, 58, 45, 0.12);
+    --shadow-md: 0 4px 8px rgba(45, 58, 45, 0.16);
+    --shadow-lg: 0 8px 16px rgba(45, 58, 45, 0.20);
+    --shadow-xl: 0 12px 24px rgba(45, 58, 45, 0.25);
+    
+    /* 边框厚度系统 */
+    --border-thickness: 16px;     /* 标准边框容器 */
+    --border-thickness-sm: 12px;  /* 小型边框容器 */
+    --border-thickness-xs: 8px;   /* 迷你边框容器 */
+    --outer-width: 3px;           /* 外边框宽度（加粗） */
+    --inner-offset: 10px;         /* 内边框偏移 */
+    
+    /* 圆角系统 */
+    --radius-none: 0;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+    
+    /* 间距系统 */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 20px;
+    --spacing-2xl: 24px;
+    --spacing-3xl: 32px;
+    
+    /* 字体大小 */
+    --font-xs: 0.75rem;    /* 12px */
+    --font-sm: 0.875rem;   /* 14px */
+    --font-md: 1rem;       /* 16px */
+    --font-lg: 1.125rem;   /* 18px */
+    --font-xl: 1.25rem;    /* 20px */
+    --font-2xl: 1.5rem;    /* 24px */
+    
+    /* 动画时长 - 像素风格简化 */
+    --transition-fast: 100ms ease;
+    --transition-normal: 150ms ease;
+    --transition-slow: 200ms ease;
+}
+
+/* ========================================
+   基础重置样式
+   ======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'DotGothic16', monospace, system-ui, -apple-system, sans-serif;
+    background: var(--bg-main);
+    color: var(--text-primary);
+    line-height: 1.5;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    font-weight: normal;
+}
+
+/* ========================================
+   游戏容器样式 - 增强绿色边框
+   ======================================== */
+
+.game-container {
+    width: 100%;
+    max-width: 450px;
+    height: 100vh;
+    margin: 0 auto;
+    background: var(--bg-main);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* 绿色线条边框，参考输入框样式 */
+    border: 3px solid var(--border-outer);
+    box-shadow: var(--shadow-xl);
+}
+
+/* ========================================
+   标题头部样式 - 卡其色背景
+   ======================================== */
+
+header {
+    background: url('../assets/images/tank/titlebg.png') no-repeat center;
+    background-size: contain;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-bottom: 3px solid var(--border-outer);
+    position: relative;
+    box-shadow: 0 2px 8px rgba(45, 58, 45, 0.15);
+    /* 让容器适应背景图片尺寸 */
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--border-green);
+}
+
+header::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--border-light-green);
+}
+
+header h1 {
+    font-size: var(--font-2xl);
+    font-weight: bold;
+    color: var(--text-primary);
+    text-align: center;
+    letter-spacing: 2px;
+    text-shadow: 
+        1px 1px 0 var(--bg-overlay),
+        0 2px 4px rgba(45, 58, 45, 0.2);
+}
+
+/* ========================================
+   状态栏样式 - 卡其色+绿色边框
+   ======================================== */
+
+#status-bar {
+    display: flex;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    background: transparent;
+    border: none;
+}
+
+.status-item {
+    flex: 1;
+    background: var(--bg-main);
+    border: 2px solid var(--border-green);
+    padding: var(--spacing-sm) var(--spacing-md);
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    transition: all var(--transition-normal);
+    /* 切角设计 */
+    clip-path: polygon(
+        6px 0,
+        100% 0,
+        100% calc(100% - 6px),
+        calc(100% - 6px) 100%,
+        0 100%,
+        0 6px
+    );
+    box-shadow: inset 0 1px 0 var(--border-middle);
+}
+
+.status-item::before {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border: 1px solid var(--border-middle);
+    pointer-events: none;
+    opacity: 0.5;
+    clip-path: inherit;
+}
+
+.status-item:hover {
+    background: var(--bg-overlay);
+    transform: translateY(-2px);
+    box-shadow: 
+        inset 0 1px 0 var(--border-accent),
+        var(--shadow-md);
+    border-color: var(--border-outer);
+}
+
+.status-item .label {
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+    font-weight: normal;
+}
+
+.status-item .value {
+    font-size: var(--font-sm);
+    font-weight: normal;
+    color: var(--text-primary);
+    text-shadow: 1px 1px 0 var(--bg-overlay);
+}
+
+/* 状态值颜色 */
+.value-low { 
+    color: var(--border-accent);
+    text-shadow: 0 0 4px rgba(168, 136, 88, 0.3);
+}
+.value-medium { 
+    color: var(--text-secondary);
+}
+.value-high { 
+    color: var(--border-outer);
+    text-shadow: 0 0 4px rgba(45, 58, 45, 0.3);
+}
+
+/* ========================================
+   角色头像区域 - 绿色边框强化
+   ======================================== */
+
+#character-avatars {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: transparent;
+    border: none;
+}
+
+.characters-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-md);
+    flex: 1;
+}
+
+.character-avatar {
+    position: relative;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.character-avatar:hover .avatar-container {
+    background: var(--bg-overlay);
+    transform: translateY(-2px);
+    box-shadow: 
+        inset 0 1px 0 var(--border-accent),
+        var(--shadow-md);
+    border-color: var(--border-outer);
+}
+
+.avatar-container {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto;
+    background: var(--bg-main);
+    border: 2px solid var(--border-outer);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-xl);
+    font-weight: normal;
+    color: var(--text-primary);
+    position: relative;
+    /* 移除阴影效果 */
+}
+
+/* 移除头像装饰边框 */
+
+.character-name {
+    font-size: var(--font-xs);
+    text-align: center;
+    color: var(--text-primary);
+    font-weight: normal;
+    display: block;
+    text-align: center;
+}
+
+#mode-toggle-btn {
+    grid-column: span 4;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-green);
+    color: var(--text-primary);
+    font-size: var(--font-sm);
+    font-weight: normal;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+#mode-toggle-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--border-outer);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+#mode-toggle-btn:hover {
+    background: var(--bg-overlay);
+    transform: translateY(-2px);
+    box-shadow: 
+        inset 0 1px 0 var(--border-accent),
+        var(--shadow-md);
+    border-color: var(--border-outer);
+}
+
+#mode-toggle-btn span {
+    position: relative;
+    z-index: 1;
+}
+
+/* ========================================
+   对话区域 - 卡其色背景
+   ======================================== */
+
+#dialogue-area,
+#avg-dialogue-area {
+    flex: 1;
+    background: var(--bg-main);
+    padding: var(--spacing-lg);
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    /* 添加上边框，使用和输入框一样的绿色线条 */
+    border-top: 3px solid var(--border-outer);
+}
+
+#dialogue-area::-webkit-scrollbar,
+#avg-dialogue-area::-webkit-scrollbar {
+    display: none;
+}
+
+.dialogue-message {
+    margin-bottom: var(--spacing-lg);
+    animation: fadeIn var(--transition-normal);
+    display: flex;
+    /* 移除固定宽度，让消息容器自适应内容 */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dialogue-avatar {
+    width: 40px;
+    height: 40px;
+    background: var(--bg-main);
+    border: 2px solid var(--border-outer);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: normal;
+    color: var(--text-primary);
+    flex-shrink: 0;
+    font-size: var(--font-sm);
+    /* 方形头像，与人物栏保持一致 */
+}
+
+.dialogue-content {
+    background: var(--bg-overlay);
+    border: 2px solid var(--border-green);
+    padding: var(--spacing-md);
+    position: relative;
+    box-shadow: 
+        inset 0 1px 0 var(--border-middle),
+        var(--shadow-sm);
+    /* 对话框切角 */
+    clip-path: polygon(
+        0 0,
+        calc(100% - 8px) 0,
+        100% 8px,
+        100% 100%,
+        8px 100%,
+        0 calc(100% - 8px)
+    );
+    /* 内容区布局 */
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: flex-start;
+    max-width: 100%;
+    min-height: 60px;
+    width: fit-content;
+}
+
+.dialogue-content::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 12px;
+    width: 8px;
+    height: 8px;
+    background: var(--bg-overlay);
+    border-left: 2px solid var(--border-green);
+    border-bottom: 2px solid var(--border-green);
+    transform: rotate(45deg);
+}
+
+.dialogue-text {
+    flex: 1;
+}
+
+.dialogue-content strong {
+    color: var(--border-outer);
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-size: var(--font-sm);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* 系统消息样式 - 无头像，有气泡，左右对齐 */
+.dialogue-message.system {
+    justify-content: flex-start;
+}
+
+.dialogue-message.system .dialogue-content {
+    background: var(--bg-accent);
+    border: 2px solid var(--border-accent);
+    color: var(--text-primary);
+    font-size: var(--font-sm);
+    font-weight: normal;
+    /* 系统消息：只有文字，居中显示，内容自适应宽度 */
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    max-width: 100% !important;
+    width: fit-content !important;
+    min-height: 40px;
+    /* 系统消息也有切角效果 */
+    clip-path: polygon(
+        0 0,
+        calc(100% - 8px) 0,
+        100% 8px,
+        100% 100%,
+        8px 100%,
+        0 calc(100% - 8px)
+    );
+    box-shadow: 
+        inset 0 1px 0 var(--border-middle),
+        var(--shadow-sm);
+}
+
+.dialogue-message.system .dialogue-avatar {
+    display: none !important;
+}
+
+
+/* NPC发言 - 头像在左侧 */
+.dialogue-message.npc {
+    justify-content: flex-start;
+}
+
+.dialogue-message.npc .dialogue-content {
+    /* 头像 + 文字 的顺序 */
+}
+
+/* 玩家发言 - 头像在右侧 */
+.dialogue-message.player {
+    justify-content: flex-end;
+}
+
+.dialogue-message.player .dialogue-content {
+    /* 文字 + 头像 的顺序 */
+    flex-direction: row-reverse;
+    background: var(--bg-secondary);
+    border-color: var(--border-accent);
+}
+
+/* ========================================
+   输入区域 - 绿色边框强化
+   ======================================== */
+
+#input-area {
+    display: flex;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    background: var(--bg-accent);
+    border-top: 3px solid var(--border-outer);
+    box-shadow: 0 -2px 8px rgba(45, 58, 45, 0.15);
+    position: relative;
+}
+
+#input-area::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--border-light-green);
+}
+
+#player-input {
+    flex: 1;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-overlay);
+    border: 2px solid var(--border-green);
+    color: var(--text-primary);
+    font-size: var(--font-md);
+    outline: none;
+    transition: all var(--transition-fast);
+    box-shadow: inset 0 1px 3px rgba(45, 58, 45, 0.1);
+    /* 输入框切角 */
+    clip-path: polygon(
+        4px 0,
+        100% 0,
+        100% calc(100% - 4px),
+        calc(100% - 4px) 100%,
+        0 100%,
+        0 4px
+    );
+}
+
+#player-input:focus {
+    background: var(--bg-main);
+    border-color: var(--border-outer);
+    box-shadow: 
+        inset 0 1px 3px rgba(45, 58, 45, 0.1),
+        0 0 0 1px var(--border-outer);
+    transform: translateY(-1px);
+}
+
+#player-input::placeholder {
+    color: var(--text-light);
+}
+
+/* ========================================
+   交互元素 - 按钮样式系统
+   ======================================== */
+
+/* 道具按钮 - 卡其色背景 */
+#items-btn {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: var(--border-middle);
+    border: 2px solid var(--border-outer);
+    color: var(--text-primary);
+    font-size: var(--font-sm);
+    font-weight: normal;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+#items-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--border-outer);
+    transform: translateY(100%);
+    transition: transform var(--transition-fast);
+}
+
+#items-btn:hover {
+    background: var(--bg-overlay);
+    transform: translateY(-2px);
+    box-shadow: 
+        inset 0 1px 0 var(--border-accent),
+        var(--shadow-md);
+    border-color: var(--border-outer);
+}
+
+#items-btn span {
+    position: relative;
+    z-index: 1;
+}
+
+#items-btn:active {
+    transform: translateY(0);
+}
+
+/* 发送按钮 - 墨绿色背景 */
+#send-btn {
+    padding: var(--spacing-sm) var(--spacing-xl);
+    background: var(--border-outer);
+    border: 2px solid var(--border-outer);
+    color: var(--text-white);
+    font-size: var(--font-sm);
+    font-weight: normal;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    box-shadow: var(--shadow-md);
+    /* 按钮切角 */
+    clip-path: polygon(
+        6px 0,
+        100% 0,
+        100% calc(100% - 6px),
+        calc(100% - 6px) 100%,
+        0 100%,
+        0 6px
+    );
+}
+
+#send-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.2);
+    transition: left var(--transition-slow);
+}
+
+#send-btn:hover::before {
+    left: 100%;
+}
+
+#send-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    background: var(--border-green);
+}
+
+#send-btn:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+#send-btn:disabled {
+    background: var(--border-middle);
+    border-color: var(--border-accent);
+    color: var(--text-light);
+    cursor: not-allowed;
+}
+
+/* 通用按钮样式 */
+button {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border: 2px solid var(--border-outer);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: var(--font-sm);
+    font-weight: normal;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    font-family: inherit;
+}
+
+/* ========================================
+   选中道具标签 - 卡其色
+   ======================================== */
+
+#selected-item-tag {
+    display: none;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: var(--bg-accent);
+    border: 2px solid var(--border-green);
+    margin-bottom: var(--spacing-sm);
+    box-shadow: var(--shadow-sm);
+}
+
+#selected-item-tag.show {
+    display: flex;
+}
+
+.selected-item-text {
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+    font-weight: normal;
+}
+
+#selected-item-name {
+    font-weight: normal;
+    color: var(--border-outer);
+}
+
+.cancel-item-btn {
+    margin-left: auto;
+    padding: 2px 8px;
+    background: var(--border-middle);
+    border: 2px solid var(--border-outer);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: var(--font-sm);
+    font-weight: normal;
+    transition: all var(--transition-fast);
+}
+
+.cancel-item-btn:hover {
+    background: var(--bg-overlay);
+    transform: translateY(-2px);
+    box-shadow: 
+        inset 0 1px 0 var(--border-accent),
+        var(--shadow-md);
+    border-color: var(--border-outer);
+}
+
+/* ========================================
+   模态框通用样式 - 绿色边框系统
+   ======================================== */
+
+/* 遮罩层 */
+.modal-overlay,
+.dialog-overlay,
+.event-overlay,
+.character-info-overlay,
+.item-gained-overlay,
+.chapter-transition-overlay,
+.items-modal {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(45, 58, 45, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn var(--transition-fast);
+    backdrop-filter: blur(2px);
+}
+
+/* 模态框内容容器 */
+.modal-content,
+.items-modal-content,
+.character-info-dialog,
+.event-dialog,
+.item-gained-dialog,
+.confirm-dialog {
+    background: var(--bg-main);
+    width: 90%;
+    max-width: 420px;
+    max-height: 80vh;
+    position: relative;
+    overflow: hidden;
+    animation: slideUp var(--transition-normal);
+    /* 简化边框装饰 */
+    border: 2px solid var(--border-outer);
+    box-shadow: var(--shadow-xl);
+}
+
+/* 事件弹窗特殊样式 */
+.event-content,
+.check-result {
+    background: var(--bg-accent);
+    padding: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+    border: 2px solid var(--border-green);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* 移除多余的装饰边框 */
+
+/* 模态框头部 */
+.modal-header,
+.items-modal-header {
+    padding: var(--spacing-lg);
+    background: var(--bg-accent);
+    border-bottom: 3px solid var(--border-outer);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.modal-header::after,
+.items-modal-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--border-light-green);
+}
+
+.modal-header h3,
+.items-modal-header h3 {
+    font-size: var(--font-lg);
+    color: var(--text-primary);
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* 关闭按钮 */
+.close-btn,
+.modal-close,
+.items-modal-close {
+    width: 32px;
+    height: 32px;
+    background: var(--bg-main);
+    border: 2px solid var(--border-outer);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-lg);
+    font-weight: normal;
+    transition: all var(--transition-fast);
+    /* 圆形切角 */
+    clip-path: polygon(
+        30% 0%, 70% 0%, 100% 30%, 100% 70%,
+        70% 100%, 30% 100%, 0% 70%, 0% 30%
+    );
+}
+
+.close-btn:hover,
+.modal-close:hover,
+.items-modal-close:hover {
+    background: var(--bg-overlay);
+    transform: translateY(-2px);
+    box-shadow: 
+        inset 0 1px 0 var(--border-accent),
+        var(--shadow-md);
+    border-color: var(--border-outer);
+}
+
+/* 模态框内容区 */
+.modal-body,
+.items-modal-body {
+    padding: var(--spacing-xl);
+    overflow-y: auto;
+    max-height: calc(80vh - 120px);
+    background: var(--bg-main);
+}
+
+/* 道具模态框特殊样式 */
+.items-modal-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.items-modal-body {
+    display: flex;
+    padding: 0;
+}
+
+.items-section {
+    flex: 1;
+    padding: var(--spacing-md);
+    border-right: 2px solid var(--border-outer);
+    overflow-y: auto;
+    background: var(--bg-accent);
+}
+
+.item-card {
+    padding: var(--spacing-md);
+    background: var(--bg-overlay);
+    border: 2px solid var(--border-green);
+    margin-bottom: var(--spacing-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    box-shadow: var(--shadow-sm);
+}
+
+.item-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--border-outer);
+    transform: scaleY(0);
+    transition: transform var(--transition-fast);
+}
+
+.item-card:hover {
+    background: var(--bg-main);
+    border-color: var(--border-outer);
+    transform: translateX(4px);
+    box-shadow: var(--shadow-md);
+}
+
+.item-card.selected {
+    background: var(--border-middle);
+    border-color: var(--border-outer);
+}
+
+.item-card.selected::before {
+    transform: scaleY(1);
+}
+
+.item-name {
+    font-weight: normal;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.item-desc {
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+}
+
+.item-details-section {
+    flex: 1;
+    padding: var(--spacing-xl);
+    background: var(--bg-main);
+}
+
+.item-details-content {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.no-selection-message {
+    text-align: center;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+.items-modal-buttons,
+.modal-buttons {
+    background: var(--bg-accent);
+    padding: var(--spacing-lg);
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: center;
+    border-top: 2px solid var(--border-outer);
+}
+
+.modal-btn {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border: 2px solid var(--border-outer);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: var(--font-sm);
+    font-weight: normal;
+    transition: all var(--transition-fast);
+}
+
+.modal-btn.primary {
+    background: var(--border-outer);
+    color: var(--text-white);
+}
+
+.modal-btn:hover {
+    background: var(--bg-overlay);
+    transform: translateY(-2px);
+    box-shadow: 
+        inset 0 1px 0 var(--border-accent),
+        var(--shadow-md);
+    border-color: var(--border-outer);
+}
+
+.modal-btn.primary:hover {
+    background: var(--border-green);
+}
+
+.modal-btn.secondary:hover {
+    background: var(--bg-overlay);
+}
+
+/* ========================================
+   数值变化动画
+   ======================================== */
+
+.value-change {
+    position: absolute;
+    font-size: var(--font-lg);
+    font-weight: normal;
+    pointer-events: none;
+    animation: floatUp 1s ease-out forwards;
+    text-shadow: 1px 1px 0 var(--bg-overlay);
+}
+
+@keyframes floatUp {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+}
+
+.value-change.positive {
+    color: var(--border-outer);
+}
+
+.value-change.negative {
+    color: var(--border-accent);
+}
+
+/* ========================================
+   加载屏幕 - 简化版本
+   ======================================== */
+
+#loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(245, 242, 232, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+}
+
+#loading.hidden {
+    display: none;
+}
+
+.loading-text {
+    color: var(--text-primary);
+    font-size: var(--font-md);
+    font-weight: normal;
+}
+
+/* ========================================
+   开始页面样式
+   ======================================== */
+
+.start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.start-screen-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+}
+
+.start-screen-content {
+    text-align: center;
+    max-width: 320px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.game-title {
+    width: 350px; /* 容器小于图片，截断边缘水印 */
+    height: 234px; /* 再增加20%：195px * 1.2 = 234px */
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--spacing-3xl);
+    transform: translateY(-100px); /* 上移100px */
+    /* 确保完全居中对齐 */
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+}
+
+.title-image {
+    width: 420px; /* 原来280px的1.5倍 */
+    height: auto;
+    margin-bottom: var(--spacing-md);
+    filter: drop-shadow(0 4px 8px rgba(45, 58, 45, 0.3));
+}
+
+
+.start-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: center;
+}
+
+.start-btn {
+    padding: var(--spacing-lg) var(--spacing-3xl);
+    background: url('../assets/images/tank/button1.png') no-repeat center;
+    background-size: 100% 100%;
+    border: none;
+    color: var(--text-primary);
+    font-size: var(--font-lg);
+    font-weight: normal;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    position: relative;
+    min-width: 160px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.start-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    filter: brightness(1.1);
+}
+
+.start-btn:active {
+    transform: translateY(0) scale(1.02);
+    filter: brightness(0.95);
+}
+
+/* 主游戏区域 */
+.main-game {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ========================================
+   章节过渡页面样式
+   ======================================== */
+
+.chapter-transition {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn var(--transition-normal);
+}
+
+.chapter-content {
+    text-align: center;
+    max-width: 350px;
+    width: 100%;
+    padding: var(--spacing-xl);
+}
+
+.chapter-title {
+    font-size: var(--font-2xl);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xl);
+    letter-spacing: 1px;
+    font-weight: normal;
+    border-bottom: 2px solid var(--border-outer);
+    padding-bottom: var(--spacing-md);
+}
+
+.chapter-text {
+    font-size: var(--font-md);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-2xl);
+    text-align: left;
+}
+
+.continue-btn {
+    padding: var(--spacing-md) var(--spacing-2xl);
+    background: var(--border-outer);
+    border: 2px solid var(--border-outer);
+    color: var(--text-white);
+    font-size: var(--font-md);
+    font-weight: normal;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-md);
+}
+
+.continue-btn:hover {
+    background: var(--border-green);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* 黑幕过渡效果 */
+.fade-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
+.fade-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ========================================
+   响应式适配
+   ======================================== */
+
+@media (max-width: 480px) {
+    :root {
+        --font-xs: 0.7rem;
+        --font-sm: 0.8rem;
+        --font-md: 0.9rem;
+        --font-lg: 1rem;
+        --font-xl: 1.1rem;
+        --font-2xl: 1.3rem;
+    }
+    
+    .game-container {
+        max-width: 100%;
+        border-left: none;
+        border-right: none;
+    }
+    
+    #character-avatars {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .avatar-container {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .modal-content,
+    .items-modal-content,
+    .character-info-dialog,
+    .event-dialog {
+        width: 95%;
+        max-height: 90vh;
+    }
+}
