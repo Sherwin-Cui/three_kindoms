@@ -23,6 +23,7 @@ class Game {
         this.pageManager = new PageManager();
         this.musicManager = new MusicManager();
         this.typewriterManager = new TypewriterManager();
+        this.popupQueueManager = new PopupQueueManager();
         
         this.isProcessing = false;
         this.gameStarted = false;
@@ -316,11 +317,65 @@ class Game {
         }
         
         // 显示NPC对话（使用打字机效果）
+        let npcDialoguePromise = Promise.resolve();
         if (response.npc_dialogue) {
-            setTimeout(() => {
-                this.uiManager.addDialogue('npc', response.npc_dialogue.speaker, response.npc_dialogue.content, true);
-            }, 1000);
+            npcDialoguePromise = new Promise((resolve) => {
+                setTimeout(() => {
+                    // 添加对话并等待打字机动画完成
+                    const messageElement = this.uiManager.addDialogue('npc', response.npc_dialogue.speaker, response.npc_dialogue.content, true);
+                    
+                    // 等待打字机动画完成
+                    setTimeout(() => {
+                        // 检查打字机动画是否完成
+                        const checkAnimation = setInterval(() => {
+                            if (!this.typewriterManager.isAnimating()) {
+                                clearInterval(checkAnimation);
+                                resolve();
+                            }
+                        }, 100);
+                    }, 500); // 给打字机动画一点启动时间
+                }, 1000);
+            });
         }
+        
+        // 等待NPC对话打字机动画完成后，再处理弹窗
+        npcDialoguePromise.then(() => {
+            console.log('🎬 NPC对话动画完成，开始处理弹窗队列');
+            
+            // 收集所有需要显示的弹窗
+            const popups = [];
+            
+            // 收集事件弹窗（优先级更高）
+            if (response.autoEvents && response.autoEvents.length > 0) {
+                response.autoEvents.forEach(event => {
+                    popups.push({
+                        type: event.type,
+                        data: event
+                    });
+                });
+            }
+            
+            // 收集道具弹窗
+            if (response.itemNotifications && response.itemNotifications.length > 0) {
+                response.itemNotifications.forEach(notification => {
+                    if (notification.type === 'item_gained') {
+                        popups.push({
+                            type: 'item_gained',
+                            data: notification
+                        });
+                    }
+                });
+            }
+            
+            // 将所有弹窗加入队列
+            popups.forEach(popup => {
+                this.popupQueueManager.addPopup(popup);
+            });
+            
+            if (popups.length === 0) {
+                console.log('🎯 没有弹窗需要处理');
+            }
+        });
         
         // 数值变化已在gameEngine中处理，这里只需要更新UI
         if (response.value_changes) {
@@ -332,44 +387,6 @@ class Game {
                 const newState = this.stateManager.getState();
                 this.showValueChangeAnimations(response.oldStateForAnimation, newState);
             }
-        }
-        
-        // 处理道具获得通知
-        if (response.itemNotifications && response.itemNotifications.length > 0) {
-            response.itemNotifications.forEach((notification, index) => {
-                if (notification.type === 'item_gained') {
-                    // 延迟显示道具获得弹窗
-                    setTimeout(() => {
-                        this.uiManager.showItemGainedDialog(notification);
-                    }, 1500 + index * 500); // 多个道具依次显示
-                }
-            });
-        }
-
-        // 处理自动触发的事件
-        if (response.autoEvents && response.autoEvents.length > 0) {
-            response.autoEvents.forEach((event, index) => {
-                if (event.type === 'choice_event') {
-                    // 延迟显示抉择事件弹窗
-                    const delay = 2000 + index * 500;
-                    setTimeout(() => {
-                        this.uiManager.showEventDialog(event);
-                    }, delay);
-                } else if (event.type === 'dialogue_event') {
-                    // 延迟显示对话事件弹窗
-                    setTimeout(() => {
-                        this.uiManager.showEventDialog(event);
-                    }, 2000 + index * 500);
-                } else if (event.type === 'check_event') {
-                    // 延迟显示检定事件弹窗
-                    setTimeout(() => {
-                        this.uiManager.showEventDialog(event);
-                    }, 2000 + index * 500);
-                }
-            });
-        } else {
-            console.log('🎯 没有autoEvents需要处理');
-            console.log('🎯 response.autoEvents:', response.autoEvents);
         }
         
         // 旧的event_suggestion处理逻辑已删除，统一使用autoEvents机制
@@ -885,10 +902,12 @@ window.closeEventDialog = function(eventId, eventType) {
 class TypewriterManager {
     constructor() {
         this.activeAnimations = new Set();
+        this.currentAnimation = null;
+        this.onComplete = null; // 动画完成回调
     }
     
     // 打字机效果
-    async typeText(element, text, speed = 50) {
+    async typeText(element, text, speed = 50, onComplete = null) {
         // 如果是HTML元素，直接使用；如果是选择器，先查找元素
         const targetElement = typeof element === 'string' ? document.querySelector(element) : element;
         if (!targetElement) return;
@@ -899,6 +918,7 @@ class TypewriterManager {
         // 创建动画标识
         const animationId = Symbol('typewriter');
         this.activeAnimations.add(animationId);
+        this.currentAnimation = animationId;
         
         return new Promise((resolve) => {
             let i = 0;
@@ -906,6 +926,7 @@ class TypewriterManager {
                 // 检查动画是否被取消
                 if (!this.activeAnimations.has(animationId)) {
                     resolve();
+                    if (onComplete) onComplete();
                     return;
                 }
                 
@@ -915,7 +936,9 @@ class TypewriterManager {
                     setTimeout(typeChar, speed);
                 } else {
                     this.activeAnimations.delete(animationId);
+                    this.currentAnimation = null;
                     resolve();
+                    if (onComplete) onComplete();
                 }
             };
             typeChar();
@@ -925,6 +948,105 @@ class TypewriterManager {
     // 停止所有打字机动画
     stopAll() {
         this.activeAnimations.clear();
+        this.currentAnimation = null;
+    }
+    
+    // 检查是否有动画正在进行
+    isAnimating() {
+        return this.currentAnimation !== null;
+    }
+}
+
+// 弹窗队列管理器
+class PopupQueueManager {
+    constructor() {
+        this.queue = [];
+        this.isProcessing = false;
+        this.currentPopup = null;
+    }
+    
+    // 添加弹窗到队列
+    addPopup(popup) {
+        this.queue.push(popup);
+        console.log('📦 添加弹窗到队列:', popup.type, '当前队列长度:', this.queue.length);
+        
+        // 如果没有在处理，开始处理队列
+        if (!this.isProcessing) {
+            this.processQueue();
+        }
+    }
+    
+    // 处理弹窗队列
+    async processQueue() {
+        if (this.queue.length === 0) {
+            this.isProcessing = false;
+            console.log('📦 弹窗队列处理完成');
+            return;
+        }
+        
+        this.isProcessing = true;
+        
+        // 按优先级排序：事件优先于道具
+        this.queue.sort((a, b) => {
+            const priorityMap = {
+                'choice_event': 1,
+                'dialogue_event': 2,
+                'check_event': 3,
+                'item_gained': 4
+            };
+            return (priorityMap[a.type] || 99) - (priorityMap[b.type] || 99);
+        });
+        
+        // 取出第一个弹窗
+        const popup = this.queue.shift();
+        this.currentPopup = popup;
+        
+        console.log('📦 显示弹窗:', popup.type);
+        
+        // 显示弹窗并等待关闭
+        await this.showPopup(popup);
+        
+        // 继续处理队列
+        this.currentPopup = null;
+        setTimeout(() => this.processQueue(), 300); // 弹窗之间留一点间隔
+    }
+    
+    // 显示弹窗
+    showPopup(popup) {
+        return new Promise((resolve) => {
+            // 根据类型显示不同的弹窗
+            if (popup.type === 'item_gained') {
+                const overlay = window.uiManager.showItemGainedDialog(popup.data);
+                
+                // 监听弹窗关闭
+                const checkClosed = setInterval(() => {
+                    if (!document.body.contains(overlay)) {
+                        clearInterval(checkClosed);
+                        resolve();
+                    }
+                }, 100);
+                
+            } else if (['choice_event', 'dialogue_event', 'check_event'].includes(popup.type)) {
+                const overlay = window.uiManager.showEventDialog(popup.data);
+                
+                // 监听弹窗关闭
+                const checkClosed = setInterval(() => {
+                    if (!document.body.contains(overlay)) {
+                        clearInterval(checkClosed);
+                        resolve();
+                    }
+                }, 100);
+            } else {
+                resolve();
+            }
+        });
+    }
+    
+    // 清空队列
+    clearQueue() {
+        this.queue = [];
+        this.isProcessing = false;
+        this.currentPopup = null;
     }
 }
 
@@ -1255,6 +1377,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.pageManager = gameInstance.pageManager; // 暴露页面管理器
         window.musicManager = gameInstance.musicManager; // 暴露音乐管理器
         window.typewriterManager = gameInstance.typewriterManager; // 暴露打字机管理器
+        window.popupQueueManager = gameInstance.popupQueueManager; // 暴露弹窗队列管理器
         console.log('游戏实例已暴露到 window.game 和 window.gameInstance');
         
         console.log('\n=== 草船借箭游戏启动成功！ ===');
@@ -1283,6 +1406,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('• quickTest("check_event4_great_success") - 测试擂鼓借箭大成功');
         console.log('• quickTest("choice_event1") - 测试应对挑衅抉择事件');
         console.log('• quickTest("multiple_items") - 测试多道具获得');
+        console.log('• quickTest("popup_sequence") - 测试弹窗时序（事件+道具）');
         
         console.log('\n💡 使用提示:');
         console.log('1. 建议先执行 disableAI() 禁用AI回复，专注测试');
